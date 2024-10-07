@@ -10,21 +10,23 @@ import java.util.List;
 public class InventoryService {
     private final InventoryServiceClient inventoryServiceClient;
 
-    private List<Inventory> inventoryList = new ArrayList<>(); // ensure it's initialized
-
     @Autowired
     public InventoryService(InventoryServiceClient inventoryServiceClient) {
         this.inventoryServiceClient = inventoryServiceClient;
     }
 
+    private List<Inventory> inventoryList = new ArrayList<>();
+
     public List<Inventory> getAllInventories() {
-        if (inventoryList.isEmpty()) {
-            throw new RuntimeException("No inventories found");
-        }
         return inventoryList;
     }
 
     public Inventory addInventory(Inventory inventory) {
+        for (Inventory existingInventory : inventoryList) {
+            if (existingInventory.getId() == inventory.getId()) {
+                throw new IllegalArgumentException("Inventory with ID " + inventory.getId() + " already exists");
+            }
+        }
         inventoryList.add(inventory);
         return inventory;
     }
@@ -37,9 +39,8 @@ public class InventoryService {
                 return inventory;
             }
         }
-        return updatedInventory;
+        throw new IllegalArgumentException("Inventory with ID " + id + " not found");
     }
-
 
     public Inventory deleteInventory(long id) {
         for (Inventory inventory : inventoryList) {
@@ -52,12 +53,9 @@ public class InventoryService {
     }
 
     public String getProductInventoryById(long id) {
-        Inventory inventory = inventoryList.stream()
-                .filter(inv -> inv.getId() == id)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Inventory with ID " + id + " not found"));
-
         Product product = inventoryServiceClient.getProductById(id);
+        Inventory inventory = inventoryList.stream().filter(inventory1 -> inventory1.getId() == id).findFirst().orElseThrow(() -> new RuntimeException("Inventory with ID " + id + " not found"));
+
         ProductInventory productInventory = new ProductInventory(
                 product.getId(),
                 product.getName(),
@@ -65,9 +63,6 @@ public class InventoryService {
                 inventory.getBrand(),
                 inventory.getQuantity()
         );
-
         return "Product details: \n" + productInventory.toString();
     }
-
-
 }
