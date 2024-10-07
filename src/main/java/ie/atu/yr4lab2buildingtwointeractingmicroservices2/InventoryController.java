@@ -24,7 +24,17 @@ public class InventoryController {
         return inventoryServiceClient.getAllProducts();
     }
 
-    @GetMapping("get-all-products")
+    @GetMapping("get-products-by-id/{id}")
+    public ResponseEntity<String> getProductInventoryById(@PathVariable long id) {
+        try {
+            String productInventory = inventoryService.getProductInventoryById(id);
+            return new ResponseEntity<>(productInventory, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>("Inventory for product not found\n", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("get-inventories")
     public List<Inventory> getAllProducts() {
         return inventoryService.getAllInventories();
     }
@@ -52,16 +62,6 @@ public class InventoryController {
             return new ResponseEntity<>("Inventory successfully deleted\n", HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>("Inventory not found\n", HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @GetMapping("productInventory/{id}")
-    public ResponseEntity<String> getProductInventoryById(@PathVariable long id) {
-        try {
-            String productInventory = inventoryService.getProductInventoryById(id);
-            return new ResponseEntity<>(productInventory, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>("Inventory for product not found\n", HttpStatus.NOT_FOUND);
         }
     }
 }
