@@ -42,9 +42,10 @@ public class InventoryService {
         for (Inventory inventory : inventoryList) {
             if (inventory.getId() == id) {
                 inventoryList.remove(inventory);
+                return inventory;
             }
         }
-        return null;
+        throw new RuntimeException("Inventory with ID " + id + " not found");
     }
 
     public String getProductInventoryById(long id) {
@@ -58,7 +59,7 @@ public class InventoryService {
                 inventory.getBrand(),
                 inventory.getQuantity()
         );
-        return "Here are the details of your product: \n" + productInventory.toString();
+        return "Product details: \n" + productInventory.toString();
     }
 
 

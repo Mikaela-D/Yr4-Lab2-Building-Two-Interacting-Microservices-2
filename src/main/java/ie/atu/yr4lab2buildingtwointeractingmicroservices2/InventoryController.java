@@ -1,12 +1,14 @@
 package ie.atu.yr4lab2buildingtwointeractingmicroservices2;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/inventory")
+@RequestMapping("/inventory/")
 public class InventoryController {
     private final InventoryServiceClient inventoryServiceClient;
     private final InventoryService inventoryService;
@@ -17,34 +19,49 @@ public class InventoryController {
         this.inventoryService = inventoryService;
     }
 
-    @GetMapping("/ProductDetails")
+    @GetMapping("get-products")
     public String getProducts() {
         return inventoryServiceClient.getAllProducts();
     }
 
-
-    @GetMapping("/allProduct")
+    @GetMapping("get-all-products")
     public List<Inventory> getAllProducts() {
         return inventoryService.getAllInventories();
     }
 
-    @PostMapping("/details")
-    public Inventory addInventory(@RequestBody Inventory inventory) {
-        return inventoryService.addInventory(inventory);
+    @PostMapping("add-inventory")
+    public ResponseEntity<String> addInventory(@RequestBody Inventory inventory) {
+        inventoryService.addInventory(inventory);
+        return new ResponseEntity<>("Inventory successfully added\n", HttpStatus.CREATED);
     }
 
-    @PutMapping("/details/{id}")
-    public Inventory updatedInventory(@PathVariable long id, @RequestBody Inventory inventory) {
-        return inventoryService.updateInventory(id, inventory);
+    @PutMapping("update-inventory/{id}")
+    public ResponseEntity<String> updatedInventory(@PathVariable long id, @RequestBody Inventory inventory) {
+        try {
+            inventoryService.updateInventory(id, inventory);
+            return new ResponseEntity<>("Inventory successfully updated\n", HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>("Inventory not found\n", HttpStatus.BAD_REQUEST);
+        }
     }
 
-    @PostMapping("/details/{id}")
-    public Inventory deletedInventory(@PathVariable long id) {
-        return inventoryService.deleteInventory(id);
+    @DeleteMapping("delete-inventory/{id}")
+    public ResponseEntity<String> deleteInventory(@PathVariable long id) {
+        try {
+            Inventory deletedInventory = inventoryService.deleteInventory(id);
+            return new ResponseEntity<>("Inventory successfully deleted\n", HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>("Inventory not found\n", HttpStatus.NOT_FOUND);
+        }
     }
 
-    @GetMapping("/productInventory/{id}")
-    public String getProductInventoryById(@PathVariable long id) {
-        return inventoryService.getProductInventoryById(id);
+    @GetMapping("productInventory/{id}")
+    public ResponseEntity<String> getProductInventoryById(@PathVariable long id) {
+        try {
+            String productInventory = inventoryService.getProductInventoryById(id);
+            return new ResponseEntity<>(productInventory, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>("Inventory for product not found\n", HttpStatus.NOT_FOUND);
+        }
     }
 }

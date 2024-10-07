@@ -20,7 +20,7 @@ public class ProductInventory {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", price=" + price +
-                ", make='" + brand + '\'' +
+                ", brand='" + brand + '\'' +
                 ", quantity=" + quantity +
                 '}';
     }
