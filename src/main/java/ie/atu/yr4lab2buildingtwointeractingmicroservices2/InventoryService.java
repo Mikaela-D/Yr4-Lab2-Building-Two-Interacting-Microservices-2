@@ -8,9 +8,6 @@ import java.util.List;
 
 @Service
 public class InventoryService {
-
-    private final List<Inventory> inventoryList = new ArrayList<>();
-
     private final InventoryServiceClient inventoryServiceClient;
 
     @Autowired
@@ -18,41 +15,51 @@ public class InventoryService {
         this.inventoryServiceClient = inventoryServiceClient;
     }
 
-    public List<Inventory> getInventoryList() {
+    private List<Inventory> inventoryList = new ArrayList<>();
+
+    public List<Inventory> getAllInventories() {
         return inventoryList;
     }
 
-    public String addInventory(Inventory inventory) {
-        // Fetch product details from the Product microservice using Feign
-        String productResponse = inventoryServiceClient.getProductById(inventory.getId());
-
-        if (productResponse != null) {
-            inventoryList.add(inventory); // Add to inventory after validating product exists
-            return "Inventory added and product details fetched successfully.";
-        } else {
-            return "Failed to add inventory: Product does not exist.";
-        }
+    public Inventory addInventory(Inventory inventory) {
+        inventoryList.add(inventory);
+        return inventory;
     }
 
-    public String updateInventory(long id, Inventory updatedInventory) {
-        // Fetch product details from the Product microservice before updating
-        String productResponse = inventoryServiceClient.getProductById(id);
-
-        if (productResponse != null) {
-            for (Inventory inventory : inventoryList) {
-                if (inventory.getId() == id) {
-                    inventory.setName(updatedInventory.getName());
-                    inventory.setPrice(updatedInventory.getPrice());
-                    return "Inventory updated and product details fetched successfully.";
-                }
+    public Inventory updateInventory(long id, Inventory updatedInventory) {
+        for (Inventory inventory : inventoryList) {
+            if (inventory.getId() == id) {
+                inventory.setBrand(updatedInventory.getBrand());
+                inventory.setQuantity(updatedInventory.getQuantity());
+                return inventory;
             }
-            return "Inventory not found.";
-        } else {
-            return "Failed to update inventory: Product does not exist.";
         }
+        return updatedInventory;
     }
 
-    public boolean deleteInventory(long id) {
-        return inventoryList.removeIf(inventory -> inventory.getId() == id);
+
+    public Inventory deleteInventory(long id) {
+        for (Inventory inventory : inventoryList) {
+            if (inventory.getId() == id) {
+                inventoryList.remove(inventory);
+            }
+        }
+        return null;
     }
+
+    public String getProductInventoryById(long id) {
+        Product product = inventoryServiceClient.getProductById(id);
+        Inventory inventory = inventoryList.stream().filter(inventory1 -> inventory1.getId() == id).findFirst().orElseThrow(() -> new RuntimeException("Inventory not found for id: " + id));
+
+        ProductInventory productInventory = new ProductInventory(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                inventory.getBrand(),
+                inventory.getQuantity()
+        );
+        return "Here are the details of your product: \n" + productInventory.toString();
+    }
+
+
 }
