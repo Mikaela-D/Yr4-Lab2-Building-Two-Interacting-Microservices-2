@@ -21,7 +21,21 @@ public class InventoryService {
         return inventoryList;
     }
 
-    public Inventory addInventory(Inventory inventory) {
+    public String getProductInventoryById(long id) {
+        Product product = inventoryServiceClient.getProductById(id);
+        Inventory inventory = inventoryList.stream().filter(inventory1 -> inventory1.getId() == id).findFirst().orElseThrow(() -> new RuntimeException("Inventory with ID " + id + " not found"));
+
+        ProductInventory productInventory = new ProductInventory(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                inventory.getBrand(),
+                inventory.getQuantity()
+        );
+        return "Product details: \n" + productInventory.toString();
+    }
+
+    public Inventory createInventory(Inventory inventory) {
         for (Inventory existingInventory : inventoryList) {
             if (existingInventory.getId() == inventory.getId()) {
                 throw new IllegalArgumentException("Inventory with ID " + inventory.getId() + " already exists");
@@ -31,11 +45,11 @@ public class InventoryService {
         return inventory;
     }
 
-    public Inventory updateInventory(long id, Inventory updatedInventory) {
+    public Inventory editInventory(long id, Inventory editInventory) {
         for (Inventory inventory : inventoryList) {
             if (inventory.getId() == id) {
-                inventory.setBrand(updatedInventory.getBrand());
-                inventory.setQuantity(updatedInventory.getQuantity());
+                inventory.setBrand(editInventory.getBrand());
+                inventory.setQuantity(editInventory.getQuantity());
                 return inventory;
             }
         }
@@ -50,19 +64,5 @@ public class InventoryService {
             }
         }
         throw new IllegalArgumentException("Inventory with ID " + id + " not found");
-    }
-
-    public String getProductInventoryById(long id) {
-        Product product = inventoryServiceClient.getProductById(id);
-        Inventory inventory = inventoryList.stream().filter(inventory1 -> inventory1.getId() == id).findFirst().orElseThrow(() -> new RuntimeException("Inventory with ID " + id + " not found"));
-
-        ProductInventory productInventory = new ProductInventory(
-                product.getId(),
-                product.getName(),
-                product.getPrice(),
-                inventory.getBrand(),
-                inventory.getQuantity()
-        );
-        return "Product details: \n" + productInventory.toString();
     }
 }

@@ -19,12 +19,12 @@ public class InventoryController {
         this.inventoryService = inventoryService;
     }
 
-    @GetMapping("get-products")
+    @GetMapping("get-products") // Gets all products
     public String getProducts() {
         return inventoryServiceClient.getAllProducts();
     }
 
-    @GetMapping("get-products-by-id/{id}")
+    @GetMapping("get-products-by-id/{id}") // Gets product and corresponding inventory
     public ResponseEntity<String> getProductInventoryById(@PathVariable long id) {
         try {
             String productInventory = inventoryService.getProductInventoryById(id);
@@ -34,28 +34,28 @@ public class InventoryController {
         }
     }
 
-    @GetMapping("get-inventories")
+    @GetMapping("get-inventories") // Gets all inventories
     public List<Inventory> getAllProducts() {
         return inventoryService.getAllInventories();
     }
 
-    @PostMapping("add-inventory")
-    public ResponseEntity<String> addInventory(@RequestBody Inventory inventory) {
-        inventoryService.addInventory(inventory);
-        return new ResponseEntity<>("Inventory successfully added\n", HttpStatus.CREATED);
+    @PostMapping("create-inventory") // Creates an inventory
+    public ResponseEntity<String> createInventory(@RequestBody Inventory inventory) {
+        inventoryService.createInventory(inventory);
+        return new ResponseEntity<>("Inventory successfully created\n", HttpStatus.CREATED);
     }
 
-    @PutMapping("update-inventory/{id}")
-    public ResponseEntity<String> updatedInventory(@PathVariable long id, @RequestBody Inventory inventory) {
+    @PutMapping("edit-inventory/{id}") // Edits an inventory
+    public ResponseEntity<String> editInventory(@PathVariable long id, @RequestBody Inventory inventory) {
         try {
-            inventoryService.updateInventory(id, inventory);
-            return new ResponseEntity<>("Inventory successfully updated\n", HttpStatus.OK);
+            inventoryService.editInventory(id, inventory);
+            return new ResponseEntity<>("Inventory successfully edited\n", HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>("Inventory not found\n", HttpStatus.BAD_REQUEST);
         }
     }
 
-    @DeleteMapping("delete-inventory/{id}")
+    @DeleteMapping("delete-inventory/{id}") // Deletes an inventory
     public ResponseEntity<String> deleteInventory(@PathVariable long id) {
         try {
             Inventory deletedInventory = inventoryService.deleteInventory(id);
