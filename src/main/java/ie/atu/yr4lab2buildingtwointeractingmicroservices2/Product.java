@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class Product {
 
     @NotNull(message = "Cannot be empty")
-    private long id;
+    private Long id;
 
     @NotBlank(message = "Cannot be blank")
     @Size(min = 2, max = 25, message = "The name must be between 2 to 25 characters")
